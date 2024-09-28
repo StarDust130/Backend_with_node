@@ -6,12 +6,22 @@ const port = 3000 || process.env.PORT;
 // Middleware in Express
 app.use(express.json());
 
+let babuData = [];
+let nextId = 1;
+
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.get("/babu", (req, res) => {
-  res.send("Hello Babu Boi");
+app.post("/teas", (req, res) => {
+  const { name, price } = req.body;
+  const newTea = {
+    id: nextId++,
+    name,
+    price,
+  };
+  babuData.push(newTea);
+  res.status(201).send(newTea);
 });
 
 app.get("*", (req, res) => {
