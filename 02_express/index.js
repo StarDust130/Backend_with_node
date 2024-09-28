@@ -1,7 +1,8 @@
+import "dotenv/config";
 import express from "express";
 
 const app = express();
-const port = 3000 || process.env.PORT;
+const port = process.env.PORT || 5000;
 
 // Middleware in Express
 app.use(express.json());
@@ -70,5 +71,5 @@ app.get("*", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log("Server is running on http://localhost:3000");
+  console.log(`Server is running on http://localhost:${port}`);
 });
