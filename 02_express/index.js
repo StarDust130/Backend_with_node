@@ -41,6 +41,20 @@ app.post("/teas", (req, res) => {
   res.status(201).send(newTea);
 });
 
+//! update Tea
+app.put("/teas/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, price } = req.body;
+  const tea = babuData.find((t) => t.id === id);
+  if (tea) {
+    tea.name = name;
+    tea.price = price;
+    res.status(200).send(tea);
+  } else {
+    res.status(404).send("Not Found");
+  }
+});
+
 //! Delete Tea
 app.delete("/teas/:id", (req, res) => {
   const id = parseInt(req.params.id);
