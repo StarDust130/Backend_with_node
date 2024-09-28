@@ -41,6 +41,13 @@ app.post("/teas", (req, res) => {
   res.status(201).send(newTea);
 });
 
+//! Delete Tea
+app.delete("/teas/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  babuData = babuData.filter((t) => t.id !== id);
+  res.status(204).send();
+});
+
 app.get("*", (req, res) => {
   res.send("Not Found 404");
 });
