@@ -58,7 +58,10 @@ app.put("/teas/:id", (req, res) => {
 //! Delete Tea
 app.delete("/teas/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  babuData = babuData.filter((t) => t.id !== id);
+  babuData = babuData.findIndex((t) => t.id === id);
+  if (teaIndex !== -1) {
+    babuData.splice(teaIndex, 1);
+  }
   res.status(204).send();
 });
 
