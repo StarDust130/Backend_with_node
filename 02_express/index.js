@@ -52,6 +52,7 @@ app.get("/teas/:id", (req, res) => {
 
 //! Post Add New Tea
 app.post("/teas", (req, res) => {
+  logger.info("Adding new tea");
   const { name, price } = req.body;
   const newTea = {
     id: nextId++,
