@@ -13,6 +13,23 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
+//!Get All
+app.get("/teas", (req, res) => {
+  res.status(200).send(babuData);
+});
+
+//!Get by ID
+app.get("/teas/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const tea = babuData.find((t) => t.id === id);
+  if (tea) {
+    res.status(200).send(tea);
+  } else {
+    res.status(404).send("Not Found");
+  }
+});
+
+//! Post Add New Tea
 app.post("/teas", (req, res) => {
   const { name, price } = req.body;
   const newTea = {
