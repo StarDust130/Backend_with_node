@@ -5,13 +5,18 @@ import { DB_NAME } from "../constant";
 
 export const connectDB = async () => {
   try {
-    await mongoose.connect(`${process.env.MONGODB_URL}`, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
-    });
-    console.log("MongoDB connected");
+    const connectionInstance = await mongoose.connect(
+      `${process.env.MONGODB_URL}/${DB_NAME}`,
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
+        useFindAndModify: false,
+      }
+    );
+    console.log(
+      `MongoDB connected Successfully: ${connectionInstance.connection.host} 🚀`
+    );
   } catch (error) {
     console.log("MongoDB connection failed 💥: ", error);
     process.exit(1);
