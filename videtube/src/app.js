@@ -22,8 +22,10 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 //? Serve static files from the public directory
 app.use(express.static("public"));
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
+//! import Routes
+import healthCheckRouter from "./routes/healthCheck.routes.js";
+
+//! All Routes
+app.use("/api/v1/health-check", healthCheckRouter);
 
 export { app };
