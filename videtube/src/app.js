@@ -34,4 +34,13 @@ import userRouter from "./routes/user.routes.js";
 app.use("/api/v1/health-check", healthCheckRouter);
 app.use("/api/v1/users", userRouter);
 
+//! Error Handler
+app.use((err, req, res, next) => {
+  console.log(err);
+  res.status(500).json({
+    success: false,
+    message: "Something went wrong 😞",
+  });
+});
+
 export { app };
