@@ -11,10 +11,16 @@ cloudinary.config({
 const uploadOnCloudinary = async (localFilePath) => {
   try {
     if (!localFilePath) return null;
-    
+
     const result = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto",
       folder: "videtube",
     });
+    console.log("Cloudinary Upload Result 📁: ", result.url);
+
+    //! once the file is upoaded to cloudinary, we can delete the file from our server
+    fs.unlinkSync(localFilePath);
+    
     return result.secure_url;
   } catch (error) {
     fs.unlinkSync(localFilePath);
