@@ -28,8 +28,10 @@ app.use(express.static("public"));
 
 //! import Routes
 import healthCheckRouter from "./routes/healthCheck.routes.js";
+import userRouter from "./routes/user.routes.js";
 
 //! All Routes
 app.use("/api/v1/health-check", healthCheckRouter);
+app.use("/api/v1/users", userRouter);
 
 export { app };
