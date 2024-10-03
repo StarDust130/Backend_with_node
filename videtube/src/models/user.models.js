@@ -71,9 +71,9 @@ userSchema.methods.generateAccessToken = function () {
       email: this.email,
       username: this.username,
     },
-    process.env.JWT_SECRET, // secret key
+    process.env.ACCESS_TOKEN_SECRET, // secret key
     {
-      expiresIn: "15m", //Expires in 15 minutes
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY, //Expires in 15 minutes
     }
   );
 };
