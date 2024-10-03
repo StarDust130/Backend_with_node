@@ -63,6 +63,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
+//! Generate the access token  for the user to authenticate
 userSchema.methods.generateAccessToken = function () {
   // short lived acess token
   return jwt.sign(
@@ -74,6 +75,22 @@ userSchema.methods.generateAccessToken = function () {
     process.env.ACCESS_TOKEN_SECRET, // secret key
     {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY, //Expires in 15 minutes
+    }
+  );
+};
+
+//! Generate the refresh token for the user to authenticate
+userSchema.methods.generateRefreshToken = function () {
+  // long lived refresh token
+  return jwt.sign(
+    {
+      _id: this._id, // data to be stored in the token
+      email: this.email,
+      username: this.username,
+    },
+    process.env.REFRESH_TOKEN_SECRET, // secret key
+    {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY, //Expires in 7 days
     }
   );
 };
