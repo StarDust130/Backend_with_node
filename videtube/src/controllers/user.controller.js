@@ -194,6 +194,24 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
+const logoutUser = asyncHandler(async (req, res) => {
+  // 1) Remove the refresh token from the user document
+  await User.findByIdAndUpdate(req.user._id, { refreshToken: "" });
+
+  // 2) Clear the cookies
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  };
+
+  // 3) Send back the response
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged out successfully 🎉"));
+});
+
 const refreshAccessToken = asyncHandler(async (req, res) => {
   // 1) Accept the refresh token
   const incomingRefreshToken =
@@ -247,9 +265,4 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export {
-  registerUser,
-  loginUser,
-  refreshAccessToken,
-  generateAccessAndRefreshToken,
-};
+export { registerUser, loginUser, logoutUser, refreshAccessToken };
