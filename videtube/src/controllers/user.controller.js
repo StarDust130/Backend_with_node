@@ -58,16 +58,44 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!isPasswordCorrect) {
     throw new ApiError(401, "Invalid Credentials", res);
   }
-  // 5) Generate a new access & refresh token
 
+  // 5) Generate a new access & refresh token
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
     user._id
   );
 
+  // 5.1) Check if the user login was successful
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  if (!loggedInUser) {
+    throw new ApiError(500, "Failed to login user ☠️", res);
+  }
+
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  };
+
   // 6) Send back the response
   return res
     .status(200)
-    .json(new ApiResponse(200, { accessToken }, "Login Successful 🎉"));
+    .cookie("accessToken", accessToken, {
+      // Set the access token in the cookie
+      options,
+    })
+    .cookie("refreshToken", refreshToken, {
+      // Set the refresh token in the cookie
+      options,
+    })
+    .json(
+      new ApiResponse(
+        200,
+        { user: loggedInUser, accessToken, refreshToken },
+        "User logged in successfully 🎉"
+      )
+    );
 });
 
 const registerUser = asyncHandler(async (req, res) => {
