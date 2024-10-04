@@ -196,7 +196,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const logoutUser = asyncHandler(async (req, res) => {
   // 1) Remove the refresh token from the user document
-  await User.findByIdAndUpdate(req.user._id, { refreshToken: "" });
+  await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: { refreshToken: undefined } }, // Remove the refresh token
+    { new: true } // Return the updated document
+  );
 
   // 2) Clear the cookies
   const options = {
