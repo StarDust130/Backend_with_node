@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const verifyJWT = asyncHandler(async (req, _, next) => {
   // 1) Get the token from the request
-  const token = req.headers.authorization;
+  const token = req.header("Authorization")?.replace("Bearer ", "");
 
   // 2) Check if the token exists
   if (!token) {
