@@ -196,50 +196,52 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   // 1) Accept the refresh token
-  const { refreshToken } = req.cookies.refreshToken || req.body.refreshToken;
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
 
   // 2) Validate the refresh token
-  if (!refreshToken) {
+  if (!incomingRefreshToken) {
     throw new ApiError(400, "Refresh Token is required", res);
   }
 
   // 3) Verify the refresh token
   try {
-    const decodedToken = jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET,
-      async (err, user) => {
-        if (err) {
-          throw new ApiError(403, "Invalid Refresh Token", res);
-        }
-
-        const user = await User.findById(decodedToken?._id);
-
-        if (!user) {
-          throw new ApiError(401, "Invalid refersh Token", res);
-        }
-
-        if (refreshToken !== user?.refreshToken) {
-          throw new ApiError(401, "Invalid refresh Token 😱", res);
-        }
-
-        // 3) Generate a new access token
-        const accessToken = jwt.sign(
-          { id: user.id },
-          process.env.ACCESS_TOKEN_SECRET,
-          {
-            expiresIn: "15m",
-          }
-        );
-
-        // 4) Send back the new access token
-        return res
-          .status(200)
-          .json(
-            new ApiResponse(200, { accessToken }, "Access Token Refreshed 🎉")
-          );
-      }
+    const decodedToken = await jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
     );
+
+    // 3.1) Check if the user exists
+    const user = await User.findById(decodedToken?._id);
+    if (!user) {
+      throw new ApiError(401, "Invalid Refresh Token", res);
+    }
+
+    // 3.2) Check if the refresh token is valid
+    if (incomingRefreshToken !== user?.refreshToken) {
+      throw new ApiError(401, "Invalid Refresh Token 😱", res);
+    }
+
+    // 3.3) Generate a new access & refresh token
+    const options = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    };
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await generateAccessAndRefreshToken(user._id);
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          { accessToken, refreshToken: newRefreshToken },
+          "Access Token Refreshed Successfully 🎉"
+        )
+      );
   } catch (error) {
     throw new ApiError(500, "Failed to refresh access token", res);
   }
