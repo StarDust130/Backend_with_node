@@ -12,18 +12,24 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
     throw new ApiError(401, "Unauthorized");
   }
 
-  // 3) Verify the token
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  try {
+    // 3) Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  // 4) Check if the user exists
-  const user = await User.findById(decoded.id);
+    // 4) Check if the user exists
+    const user = await User.findById(decoded.id).select(
+      "-password -refreshToken"
+    );
 
-  if (!user) {
-    throw new ApiError(404, "User not found");
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    // 5) Attach the user to the request object
+    req.user = user;
+
+    next();
+  } catch (error) {
+    throw new ApiError(401, "Unauthorized");
   }
-
-  // 5) Attach the user to the request object
-  req.user = user;
-
-  next();
 });
