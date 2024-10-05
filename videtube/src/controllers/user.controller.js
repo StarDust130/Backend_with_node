@@ -424,6 +424,53 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     );
 });
 
+//! Learn Aggregation Pipeline in MongoDB
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  // 1) Get the username from the request params
+  const { username } = req.params;
+
+  if (!username?.trim()) {
+    throw new ApiError(400, "Please provide the username", res);
+  }
+
+  const channel = await User.aggregate([
+    {
+      // Pipleline 1 - Match the username
+      $match: {
+        username: username?.toLowerCase().trim(),
+      },
+    },
+    {
+      // Pipeline 2 - Lookup to get the subscribers
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
+      },
+    },
+    {
+      // Pipeline 3 - Lookup to get
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscriberedTo",
+      },
+    },
+    {
+      // Pipeline 4 - Add the subscriber count
+      $addFields: {
+        subscriberCount: { $size: "$subscribers" },
+        channelSubscribedToCount: { $size: "$subscriberedTo" },
+      },
+    },
+  ]);
+});
+
+const getWatchHistory = asyncHandler(async (req, res) => {});
+
 export {
   registerUser,
   loginUser,
@@ -434,4 +481,6 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImage,
+  getUserChannelProfile,
+  getWatchHistory,
 };
