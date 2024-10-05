@@ -307,6 +307,9 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   const user = req.user;
 
   // 2) Send back the response
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User found successfully 🎉"));
 });
 
 const updateUserDetails = asyncHandler(async (req, res) => {});
