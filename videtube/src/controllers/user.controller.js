@@ -464,9 +464,41 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       $addFields: {
         subscriberCount: { $size: "$subscribers" },
         channelSubscribedToCount: { $size: "$subscriberedTo" },
+        isSubscribed: {
+          $cond: {
+            if: {
+              $in: [req.user?._id, "$subscribers.subscriber"],
+            },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      // Pipeline 5 - Project only the necessary data
+      $project: {
+        _id: 0,
+        username: 1,
+        fullName: 1,
+        avatar: 1,
+        coverImage: 1,
+        subscriberCount: 1,
+        channelSubscribedToCount: 1,
+        isSubscribed: 1,
       },
     },
   ]);
+
+  if (!channel?.length) {
+    throw new ApiError(404, "Channel not found", res);
+  }
+
+  // 2) Send back the response
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, channel[0], "Channel found successfully 🎉"));
 });
 
 const getWatchHistory = asyncHandler(async (req, res) => {});
