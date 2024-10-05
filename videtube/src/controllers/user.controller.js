@@ -317,10 +317,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullName, email, username } = req.body;
 
   // 2) Validate the data
-  if (
-    [fullName, email, username].includes(undefined) ||
-    [fullName, email, username].includes("")
-  ) {
+  if (!fullName || !email || !username) {
     throw new ApiError(400, "Please provide all the required fields", res);
   }
 
@@ -344,9 +341,88 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Account details updated successfully 🎉"));
 });
 
-const updateUserAvatar = asyncHandler(async (req, res) => {});
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  // 1) Accept the avatar from the user
+  const avatarLocalPath = req.files?.avatar?.[0]?.path;
 
-const updateUserCoverImage = asyncHandler(async (req, res) => {});
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Avatar Image is Required! 🍧", res);
+  }
+
+  // 2) Upload the avatar to Cloudinary
+  let avatar;
+  try {
+    avatar = await uploadOnCloudinary(avatarLocalPath, "avatar");
+    console.log("Avatar Upload Success 🎉: ", avatar);
+  } catch (error) {
+    throw new ApiError(500, "Failed to upload avatar to Cloudinary", res);
+  }
+
+  if (!avatar) {
+    throw new ApiError(500, "Failed to upload image to Cloudinary", res);
+  }
+
+  // 3) Update the user avatar
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found", res);
+  }
+
+  user.avatar = avatar.url;
+
+  await user.save({ validateBeforeSave: false });
+
+  // 4) Send back the response
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { avatar: avatar.url }, "Avatar updated 🎉"));
+});
+
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+  // 1) Accept the cover image from the user
+  const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "Cover Image is Required! 🍧", res);
+  }
+
+  // 2) Upload the cover image to Cloudinary
+
+  let coverImage;
+  try {
+    coverImage = await uploadOnCloudinary(coverImageLocalPath, "coverImage");
+    console.log("Cover Image Upload Success 🎉: ", coverImage);
+  } catch (error) {
+    throw new ApiError(500, "Failed to upload cover image to Cloudinary", res);
+  }
+
+  if (!coverImage) {
+    throw new ApiError(500, "Failed to upload image to Cloudinary", res);
+  }
+
+  // 3) Update the user cover image
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found", res);
+  }
+
+  user.coverImage = coverImage.url;
+
+  await user.save({ validateBeforeSave: false });
+
+  // 4) Send back the response
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { coverImage: coverImage.url },
+        "Cover Image updated 🎉"
+      )
+    );
+});
 
 export {
   registerUser,
