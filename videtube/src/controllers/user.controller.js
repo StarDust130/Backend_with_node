@@ -312,7 +312,37 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "User found successfully 🎉"));
 });
 
-const updateUserDetails = asyncHandler(async (req, res) => {});
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  // 1) Accept the data from the user
+  const { fullName, email, username } = req.body;
+
+  // 2) Validate the data
+  if (
+    [fullName, email, username].includes(undefined) ||
+    [fullName, email, username].includes("")
+  ) {
+    throw new ApiError(400, "Please provide all the required fields", res);
+  }
+
+  // 3) Check if the user exists
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found", res);
+  }
+
+  // 4) Update the user details
+  user?.fullName = fullName;
+  user?.email = email;
+  user?.username = username;
+
+  await user.save({ validateBeforeSave: false });
+
+  // 5) Send back the response
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Account details updated successfully 🎉"));
+});
 
 const updateUserAvatar = asyncHandler(async (req, res) => {});
 
@@ -325,7 +355,7 @@ export {
   refreshAccessToken,
   changeCurrentPassword,
   getCurrentUser,
-  updateUserDetails,
+  updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImage,
 };
