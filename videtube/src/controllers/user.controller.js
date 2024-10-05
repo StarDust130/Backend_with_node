@@ -279,15 +279,22 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   }
 
   // 3) Check if the current password is correct
-  const isPasswordCorrect = await req.user.isPasswordCorrect(currentPassword);
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found", res);
+  }
+
+  const isPasswordCorrect = await user.isPasswordCorrect(currentPassword);
 
   if (!isPasswordCorrect) {
     throw new ApiError(401, "Invalid Current Password", res);
   }
 
   // 4) Update the password
-  req.user.password = newPassword;
-  await req.user.save();
+  user.password = newPassword;
+
+  await user.save({ validateBeforeSave: false });
 
   // 5) Send back the response
   return res
@@ -296,15 +303,17 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-  
+  // 1) Get the user from the request object
+  const user = req.user;
+
+  // 2) Send back the response
 });
 
-const updateUserDetails = asyncHandler(async (req, res) => {
-
-});
-
+const updateUserDetails = asyncHandler(async (req, res) => {});
 
 const updateUserAvatar = asyncHandler(async (req, res) => {});
+
+const updateUserCoverImage = asyncHandler(async (req, res) => {});
 
 export {
   registerUser,
@@ -315,4 +324,5 @@ export {
   getCurrentUser,
   updateUserDetails,
   updateUserAvatar,
+  updateUserCoverImage,
 };
