@@ -501,7 +501,62 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, channel[0], "Channel found successfully 🎉"));
 });
 
-const getWatchHistory = asyncHandler(async (req, res) => {});
+const getWatchHistory = asyncHandler(async (req, res) => {
+  // 1) Get the watch history of the user
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        pipeline: [
+          // This is a sub-pipeline
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              pipeline: [
+                //  This is a another sub-pipeline
+                {
+                  $project: {
+                    _id: 0,
+                    username: 1,
+                    fullName: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        owner: { $first: "$owner" },
+      },
+    },
+  ]);
+
+  if (!user?.length) {
+    throw new ApiError(404, "Watch History not found", res);
+  }
+
+  // 2) Send back the response
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, user[0]?.watchHistory, "Watch History found 🎉")
+    );
+});
 
 export {
   registerUser,
