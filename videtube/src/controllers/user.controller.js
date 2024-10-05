@@ -343,7 +343,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
   // 1) Accept the avatar from the user
-  const avatarLocalPath = req.files?.avatar?.[0]?.path;
+  const avatarLocalPath = req.file?.avatar?.[0]?.path;
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar Image is Required! 🍧", res);
@@ -358,7 +358,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to upload avatar to Cloudinary", res);
   }
 
-  if (!avatar) {
+  if (!avatar.url) {
     throw new ApiError(500, "Failed to upload image to Cloudinary", res);
   }
 
@@ -381,7 +381,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   // 1) Accept the cover image from the user
-  const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+  const coverImageLocalPath = req.file?.coverImage?.[0]?.path;
 
   if (!coverImageLocalPath) {
     throw new ApiError(400, "Cover Image is Required! 🍧", res);
